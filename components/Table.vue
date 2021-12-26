@@ -50,6 +50,7 @@
           </el-table-column>
         </el-table>
         <el-pagination
+          class="pagination"
           background
           @current-change="handleCurrentChange"
           :current-page.sync="page"
@@ -134,7 +135,10 @@ export default {
 .el-row {
   margin-bottom: 10px;
 }
-
+.pagination {
+  margin-top: 20px;
+  text-align: center;
+}
 h3 {
   text-align: center;
 }
