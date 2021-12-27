@@ -7,11 +7,7 @@
 
     <el-row :gutter="20">
       <el-col :span="16"
-        ><el-table
-          v-loading="users.length === 0"
-          :data="users"
-          style="width: 100%"
-        >
+        ><el-table v-loading="loading" :data="users" style="width: 100%">
           <el-table-column label="ID" width="60">
             <template slot-scope="scope">
               <span style="margin-left: 10px">{{ scope.row.id }}</span>
@@ -21,23 +17,23 @@
           <el-table-column label="Дата" width="180">
             <template slot-scope="scope">
               <span style="margin-left: 10px">{{
-                new Date(scope.row.ctime).toLocaleString('ru-ru', {
-                  dateStyle: 'short',
-                  timeStyle: 'short',
-                })
+                formatDate(scope.row.ctime)
               }}</span>
             </template>
           </el-table-column>
+
           <el-table-column label="Имя" width="180">
             <template slot-scope="scope">
               <p>{{ scope.row.name }}</p>
             </template>
           </el-table-column>
+
           <el-table-column label="Роль" width="180">
             <template slot-scope="scope">
               <p>{{ scope.row.role }}</p>
             </template>
           </el-table-column>
+
           <el-table-column label="Действия">
             <template slot-scope="scope">
               <el-button
@@ -49,6 +45,7 @@
             </template>
           </el-table-column>
         </el-table>
+
         <el-pagination
           class="pagination"
           background
@@ -60,22 +57,21 @@
         >
         </el-pagination>
       </el-col>
+
       <el-col :span="8"
         ><el-table
-          v-loading="socketData.length === 0"
+          v-loading="!socketData.length"
           :data="socketData"
           style="width: 100%"
         >
           <el-table-column label="Дата" width="180">
             <template slot-scope="scope">
               <span style="margin-left: 10px">{{
-                new Date(scope.row.ctime).toLocaleString('ru-ru', {
-                  dateStyle: 'short',
-                  timeStyle: 'short',
-                })
+                formatDate(scope.row.ctime)
               }}</span>
             </template>
           </el-table-column>
+
           <el-table-column label="Событие" width="180">
             <template slot-scope="scope">
               <span style="margin-left: 10px">{{ scope.row.event }}</span>
@@ -84,6 +80,8 @@
         </el-table></el-col
       >
     </el-row>
+
+    <el-alert v-if="errorMessage" :title="errorMessage" type="error" />
   </el-container>
 </template>
 
@@ -92,11 +90,13 @@ export default {
   data() {
     return {
       users: [],
-      limit: null,
+      limit: 5,
       total: 0,
-      page: 0,
+      page: 1,
       per_page: null,
       offset: null,
+      loading: false,
+      errorMessage: null,
       socketData: [],
     }
   },
@@ -116,16 +116,36 @@ export default {
     handleDelete(index, row) {
       this.users.splice(index, 1)
     },
+
+    formatDate(ctime) {
+      return new Date(ctime * 1000).toLocaleString('ru-ru', {
+        dateStyle: 'short',
+        timeStyle: 'short',
+      })
+    },
+
     async handleCurrentChange(pageNumber) {
-      const response = await fetch(
-        `https://test.relabs.ru/api/users/list?page=${pageNumber}`
-      ).then((res) => res.json())
-      console.log(response)
-      this.users = response.items
-      this.limit = response.limit
-      this.per_page = response.per_page
-      this.total = response.total
-      this.offset = response.offset
+      this.errorMessage = null
+      this.loading = true
+
+      try {
+        const response = await fetch(
+          `https://test.relabs.ru/api/users/list?limit=${this.limit}&offset=${
+            this.limit * (pageNumber - 1)
+          }`
+        )
+
+        const data = await response.json()
+        const { items, per_page, total, offset } = data
+        this.users = items
+        this.per_page = per_page
+        this.total = total
+        this.offset = offset
+      } catch (error) {
+        this.errorMessage = error.message
+      }
+
+      this.loading = false
     },
   },
 }

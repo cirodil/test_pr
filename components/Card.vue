@@ -423,6 +423,8 @@ export default {}
   line-height: 1.1;
   letter-spacing: 0;
   font-weight: 700;
+  padding: 3px 10px 5px;
+  text-transform: initial;
   text-align: center;
   position: relative;
   display: inline-block;
@@ -430,6 +432,7 @@ export default {}
   border-radius: 8px;
   cursor: pointer;
   text-decoration: none;
+
   color: #fff;
   background-color: #cb11ab;
   border: 2px solid #cb11ab;
@@ -438,6 +441,10 @@ export default {}
   font-size: 14px;
   line-height: 20px;
   padding: 3px 16px 5px;
+}
+.btn-main-sm:hover {
+  background-color: #e313bf;
+  border-color: #e313bf;
 }
 .btn-heart {
   display: inline-block;
